@@ -1,13 +1,13 @@
-from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError, UserError
-from datetime import date, timedelta
+from odoo import fields, models
 
 
-class AppointmentAttachmentLine(models.Model):
-    _name = "appointment.attachment.line"
+class DentalAttachmentLine(models.Model):
+    _name = "dental.attachment.line"
+    _description = "Adjunto de cita odontológica"
 
-
-
-    appointment_id = fields.Many2one('patient.appointment', 'appointment_attachment_line_id')
-    attachment_deposition_date = fields.Date('Date Of Deposition', default=date.today())
-    file = fields.Binary(string='File Name')
+    appointment_id = fields.Many2one("dental.appointment", required=True, ondelete="cascade", index=True, check_company=True)
+    company_id = fields.Many2one(related="appointment_id.company_id", store=True, index=True)
+    attachment_date = fields.Date(string="Fecha", default=fields.Date.context_today, required=True)
+    name = fields.Char(string="Nombre", required=True)
+    file = fields.Binary(string="Archivo", required=True, attachment=True)
+    file_name = fields.Char(string="Nombre del archivo")

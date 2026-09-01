@@ -1,82 +1,68 @@
-from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError, UserError
+from datetime import date
 
-from datetime import date, timedelta
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 
-
-class Patient(models.Model):
-    _name = "patient.patient"
-    _inherit = ['mail.thread']
+class DentalPatient(models.Model):
+    _name = "dental.patient"
+    _description = "Paciente odontológico"
+    _inherit = ["mail.thread", "mail.activity.mixin"]
     _rec_name = "patient_name"
+    _order = "patient_name, id"
 
-    patient_serial = fields.Char(string="Patient Serial", required=True, copy=False, readonly=True, index=True, default=lambda self: _("New Patient"))
-    patient_name = fields.Char('Patient Name')
-    contact_number = fields.Char('Contact Number', tracking=True)
-    appointment_id = fields.One2many('patient.appointment', 'patient_id')
-    date_of_birth = fields.Date(string='Date Of Birth', default=date.today())
-    age = fields.Char(string='Age In Years', compute="compute_age", store=True)
-    gender = fields.Selection([
-        ('male', 'Male'),
-        ('female', 'Female'),
-    ], required=False, string="Gender", tracking=True)
-    occupation = fields.Char('Occupation')
-    marital_status = fields.Selection([
-        ('single', 'Single'),
-        ('married', 'Married'),
-        ('divorced', 'Divorced'),
-    ], required=False, string="Marital Status", tracking=True)
-    blood_type = fields.Selection([
-        ('a-', 'A without Rh-factor'),
-        ('a+', 'A with Rh-factor'),
-        ('b-', 'B without Rh-factor'),
-        ('b+', 'B with Rh-factor'),
-    ], required=False, string="Blood Typing", tracking=True)
+    active = fields.Boolean(default=True)
+    company_id = fields.Many2one("res.company", required=True, default=lambda self: self.env.company, index=True)
+    patient_serial = fields.Char(string="Historia clínica", required=True, copy=False, readonly=True, index=True, default=lambda self: _("Nuevo"))
+    patient_name = fields.Char(string="Nombre completo", required=True, tracking=True, index=True)
+    identification_type = fields.Selection(
+        [("cedula", "Cédula"), ("ruc", "RUC"), ("passport", "Pasaporte"), ("other", "Otro")],
+        string="Tipo de identificación", default="cedula", required=True,
+    )
+    identification = fields.Char(string="Número de identificación", required=True, index=True)
+    email = fields.Char()
+    contact_number = fields.Char(string="Teléfono", tracking=True)
+    date_of_birth = fields.Date(string="Fecha de nacimiento")
+    age = fields.Integer(string="Edad", compute="_compute_age", store=True)
+    gender = fields.Selection(
+        [("male", "Masculino"), ("female", "Femenino"), ("other", "Otro"), ("not_specified", "No especificado")], string="Género",
+    )
+    occupation = fields.Char(string="Ocupación")
+    marital_status = fields.Selection(
+        [("single", "Soltero/a"), ("married", "Casado/a"), ("divorced", "Divorciado/a"), ("widowed", "Viudo/a")], string="Estado civil",
+    )
+    blood_type = fields.Selection(
+        [("a-", "A-"), ("a+", "A+"), ("b-", "B-"), ("b+", "B+"), ("ab-", "AB-"), ("ab+", "AB+"), ("o-", "O-"), ("o+", "O+")], string="Tipo sanguíneo",
+    )
+    anticoagulants = fields.Boolean(string="Usa anticoagulantes")
+    anticoagulants_notes = fields.Char(string="Detalle de anticoagulantes")
+    immunological_diseases = fields.Boolean(string="Enfermedades inmunológicas")
+    immunological_diseases_notes = fields.Char(string="Detalle de enfermedades")
+    medical_alerts = fields.Text(string="Alertas médicas")
+    appointment_ids = fields.One2many("dental.appointment", "patient_id", string="Citas")
+    prescription_ids = fields.One2many("dental.prescription", "patient_id", string="Prescripciones")
 
-    qstn_1 = fields.Selection([
-        ('yes', 'Yes'),
-        ('no', 'No'),], required=False)
-    qstn_1_note = fields.Char()
-    qstn_2 = fields.Selection([
-        ('yes', 'Yes'),
-        ('no', 'No'),], required=False)
-    qstn_2_note = fields.Char()
+    _sql_constraints = [
+        ("dental_patient_identification_company_uniq", "unique(company_id, identification)", "Ya existe un paciente con esta identificación en la compañía."),
+    ]
 
-    patient_prescriptions = fields.One2many('patient.prescription', 'patient_id')
+    @api.depends("date_of_birth")
+    def _compute_age(self):
+        today = fields.Date.context_today(self)
+        for patient in self:
+            patient.age = 0
+            if patient.date_of_birth:
+                patient.age = today.year - patient.date_of_birth.year - ((today.month, today.day) < (patient.date_of_birth.month, patient.date_of_birth.day))
 
+    @api.constrains("date_of_birth")
+    def _check_date_of_birth(self):
+        for patient in self:
+            if patient.date_of_birth and patient.date_of_birth > date.today():
+                raise ValidationError(_("La fecha de nacimiento no puede estar en el futuro."))
 
-
-    @api.depends('date_of_birth')
-    def compute_age(self):
-        try:
-
-            age = date.today() - self.date_of_birth
-            age_in_years = age.days // 365.2425
-            self.age = str(age_in_years) + "Years Old"
-        except:
-            pass
-        
-    @api.model
-    def create(self, vals):  # save button in the form view
-
-        if vals.get('patient_serial', _('New Patient')) == _('New Patient'):
-            vals['patient_serial'] = self.env['ir.sequence'].next_by_code('patient.sequence') or _('New Patient')
-        res = super(Patient, self).create(vals)
-        return res
-        # for rec in self:
-        #     # todo don't forget to clarify that both two following variables are updated on
-        #     # every change in sale order form
-        #     sale_line_count = 0
-        #     added_items_price_ordered_list = rec.order_line_id.mapped('price')
-        #     added_items_quantity_ordered_list = rec.order_line_id.mapped('qty')
-
-        #     item_price_multiplied_by_quantity = [price * qty for price, qty in
-        #                                          zip(added_items_price_ordered_list, added_items_quantity_ordered_list)]
-            
-        #     sale_total_value = sum(item_price_multiplied_by_quantity)
-
-            
-        #     print(item_price_multiplied_by_quantity) # a list that contains each line subtotal
-        #     print(rec.order_line_id.ids)
-        #     rec.order_total = sale_total_value
-
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get("patient_serial", _("Nuevo")) == _("Nuevo"):
+                vals["patient_serial"] = self.env["ir.sequence"].next_by_code("dental.patient") or _("Nuevo")
+        return super().create(vals_list)

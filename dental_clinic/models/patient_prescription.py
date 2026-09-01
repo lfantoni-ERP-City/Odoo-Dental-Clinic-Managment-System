@@ -1,36 +1,45 @@
-from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError, UserError
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
-from datetime import date, timedelta
 
-class PatientPrescription(models.Model):
-    _name = "patient.prescription"
+class DentalPrescription(models.Model):
+    _name = "dental.prescription"
+    _description = "Prescripción odontológica"
+    _rec_name = "prescription_serial"
+    _order = "prescription_date desc, id desc"
 
-    prescription_serial = fields.Char(string="Prescription Serial", required=True, copy=False, readonly=True, index=True, default=lambda self: _("New Prescription"))
-    prescription_date = fields.Date('Date Of Formulation', default=date.today())
+    company_id = fields.Many2one("res.company", required=True, default=lambda self: self.env.company, index=True)
+    prescription_serial = fields.Char(string="Número", required=True, copy=False, readonly=True, index=True, default=lambda self: _("Nuevo"))
+    prescription_date = fields.Date(string="Fecha", default=fields.Date.context_today, required=True)
+    patient_id = fields.Many2one("dental.patient", string="Paciente", required=True, check_company=True, index=True)
+    appointment_id = fields.Many2one("dental.appointment", string="Cita", ondelete="set null", check_company=True)
+    line_ids = fields.One2many("dental.prescription.line", "prescription_id", string="Medicamentos")
+    notes = fields.Text(string="Indicaciones")
 
-    patient_id = fields.Many2one(related="appointment_id.patient_id")
-    appointment_id = fields.Many2one('patient.appointment', invisible=True)
-    appointment_id_name = fields.Char('Appointment Name', related='appointment_id.appointment_serial', readonly=True)
-    prescription_line_id = fields.One2many("patient.prescription.line", "prescription_id")
-    notes = fields.Text("Notes")
+    @api.onchange("appointment_id")
+    def _onchange_appointment_id(self):
+        if self.appointment_id:
+            self.patient_id = self.appointment_id.patient_id
 
-    @api.model
-    def create(self, vals):  # save button in the form view
+    @api.constrains("appointment_id", "patient_id", "company_id")
+    def _check_appointment_patient(self):
+        for prescription in self:
+            if prescription.appointment_id and prescription.appointment_id.patient_id != prescription.patient_id:
+                raise ValidationError(_("El paciente de la prescripción debe coincidir con el de la cita."))
 
-        if vals.get('prescription_serial', _('New Prescription')) == _('New Prescription'):
-            vals['prescription_serial'] = self.env['ir.sequence'].next_by_code('patient.appointment.prescription.sequence') or _('New Prescription')
-        res = super(PatientPrescription, self).create(vals)
-        return res
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get("prescription_serial", _("Nuevo")) == _("Nuevo"):
+                vals["prescription_serial"] = self.env["ir.sequence"].next_by_code("dental.prescription") or _("Nuevo")
+        return super().create(vals_list)
 
-                                      
 
-class PatientPrescriptionLine(models.Model):
-    _name = "patient.prescription.line"
+class DentalPrescriptionLine(models.Model):
+    _name = "dental.prescription.line"
+    _description = "Detalle de prescripción odontológica"
 
-    prescription_id = fields.Many2one('patient.prescription', invisible=True)
-    prescription_id_name = fields.Char(related='prescription_id.prescription_serial', string='Prescription ID')
-    medicine_trade_name = fields.Char(string="Trade Name of Medicine")
-    therapeutic_regimen = fields.Char(string="Therapeutic Regimen of Medicine")
-
-                                      
+    prescription_id = fields.Many2one("dental.prescription", required=True, ondelete="cascade", index=True, check_company=True)
+    company_id = fields.Many2one(related="prescription_id.company_id", store=True, index=True)
+    medicine_trade_name = fields.Char(string="Medicamento", required=True)
+    therapeutic_regimen = fields.Char(string="Posología", required=True)

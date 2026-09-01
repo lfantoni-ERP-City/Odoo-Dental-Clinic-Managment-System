@@ -1,44 +1,49 @@
-# Odoo-Dental-Clinic-Managment-System-With-REST-API
+# Clínica Dental Ecuador — Odoo 19
 
-An odoo project to manage a dental clinic appointments, patients and prescriptions. It features an authentication-based API to login and create new appointments. 
+Módulo para administrar pacientes, odontólogos, agenda, procedimientos, prescripciones y adjuntos clínicos en Odoo 19 Enterprise sobre Odoo.sh.
 
-## Screenshots
+## Alcance ecuatoriano
 
-<picture>
- <img alt="Screenshot1" src="https://raw.githubusercontent.com/ambientWave/Odoo-Dental-Clinic-Managment-System-With-REST-API/main/Image2.png">
-</picture>
+- Dependencia de `l10n_ec`; la compañía debe tener configurado Ecuador, USD y sus datos tributarios en Odoo.
+- Identificación de paciente para cédula, RUC, pasaporte u otro documento.
+- Interfaz y documentos de operación en español.
+- Datos clínicos y agenda separados por compañía mediante ACL y reglas de registro.
 
-<picture>
- <img alt="Screenshot1" src="https://raw.githubusercontent.com/ambientWave/Odoo-Dental-Clinic-Managment-System-With-REST-API/main/Image3.png">
-</picture>
+La emisión electrónica de comprobantes del SRI no se genera desde este módulo. Debe configurarse con la localización ecuatoriana y Facturación de Odoo; esta separación evita duplicar lógica tributaria certificada.
 
-<picture>
- <img alt="Screenshot1" src="https://raw.githubusercontent.com/ambientWave/Odoo-Dental-Clinic-Managment-System-With-REST-API/main/Image4.png">
-</picture>
+## Instalación en Odoo.sh
 
-<picture>
- <img alt="Screenshot1" src="https://raw.githubusercontent.com/ambientWave/Odoo-Dental-Clinic-Managment-System-With-REST-API/main/Image5.png">
-</picture>
+1. Agrega este repositorio o el directorio `dental_clinic` al repositorio conectado a Odoo.sh.
+2. Crea una rama de desarrollo y confirma que el build usa Odoo 19.
+3. En Apps, actualiza la lista de aplicaciones e instala **Clínica Dental Ecuador**.
+4. Asigna a cada usuario el rol **Usuario de clínica** o **Administrador de clínica** y valida el acceso con una compañía de prueba.
+5. Convierte la rama en staging y prueba con una copia anonimizada de los datos de producción antes de fusionar a producción.
 
-<picture>
- <img alt="Screenshot1" src="https://raw.githubusercontent.com/ambientWave/Odoo-Dental-Clinic-Managment-System-With-REST-API/main/Image1.png">
-</picture>
+## API REST
 
-<picture>
- <img alt="Screenshot1" src="https://raw.githubusercontent.com/ambientWave/Odoo-Dental-Clinic-Managment-System-With-REST-API/main/Image6.png">
-</picture>
+La API no acepta contraseñas ni crea tokens propios. Usa una API key nativa de Odoo 19 con el rol de clínica correspondiente:
 
+```http
+Authorization: Bearer <api-key-de-odoo>
+Content-Type: application/json
+```
 
-<picture>
- <img alt="Screenshot1" src="https://raw.githubusercontent.com/ambientWave/Odoo-Dental-Clinic-Managment-System-With-REST-API/main/Image7.png">
-</picture>
+| Método | Ruta | Uso |
+| --- | --- | --- |
+| `GET` | `/dental_clinic/api/v1/appointments?limit=50` | Consulta de citas accesibles al usuario. |
+| `POST` | `/dental_clinic/api/v1/appointments` | Creación de una cita. |
 
+Ejemplo de creación:
 
-<picture>
- <img alt="Screenshot1" src="https://raw.githubusercontent.com/ambientWave/Odoo-Dental-Clinic-Managment-System-With-REST-API/main/Image8.png">
-</picture>
+```json
+{
+  "patient_id": 12,
+  "doctor_id": 4,
+  "start": "2026-09-02 09:00:00",
+  "stop": "2026-09-02 09:30:00",
+  "appointment_type": "reserved",
+  "chief_complaints": "Control odontológico"
+}
+```
 
-<picture>
- <img alt="Screenshot1" src="https://raw.githubusercontent.com/ambientWave/Odoo-Dental-Clinic-Managment-System-With-REST-API/main/Image9.png">
-</picture>
-
+Las llamadas se ejecutan con los permisos y las reglas multi-compañía del usuario de la clave. Nunca incluyas API keys en el repositorio ni en parámetros de configuración versionados.

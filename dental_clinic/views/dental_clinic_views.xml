@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_dental_patient_list" model="ir.ui.view">
+        <field name="name">dental.patient.list</field><field name="model">dental.patient</field>
+        <field name="arch" type="xml"><list><field name="patient_serial"/><field name="patient_name"/><field name="identification"/><field name="contact_number"/><field name="age"/><field name="company_id" groups="base.group_multi_company"/></list></field>
+    </record>
+    <record id="view_dental_patient_form" model="ir.ui.view">
+        <field name="name">dental.patient.form</field><field name="model">dental.patient</field>
+        <field name="arch" type="xml">
+            <form><sheet>
+                <div class="oe_title"><h1><field name="patient_serial" readonly="1"/></h1></div>
+                <group><group><field name="patient_name"/><field name="identification_type"/><field name="identification"/><field name="contact_number"/><field name="email"/></group>
+                <group><field name="date_of_birth"/><field name="age" readonly="1"/><field name="gender"/><field name="blood_type"/><field name="company_id" groups="base.group_multi_company"/></group></group>
+                <notebook>
+                    <page string="Información adicional"><group><field name="occupation"/><field name="marital_status"/><field name="medical_alerts"/></group></page>
+                    <page string="Antecedentes médicos"><group><group><field name="anticoagulants"/><field name="anticoagulants_notes" invisible="not anticoagulants"/></group><group><field name="immunological_diseases"/><field name="immunological_diseases_notes" invisible="not immunological_diseases"/></group></group></page>
+                    <page string="Citas"><field name="appointment_ids" readonly="1"><list><field name="appointment_serial"/><field name="start"/><field name="doctor_id"/><field name="state"/></list></field></page>
+                    <page string="Prescripciones"><field name="prescription_ids" readonly="1"><list><field name="prescription_serial"/><field name="prescription_date"/><field name="appointment_id"/></list></field></page>
+                </notebook>
+            </sheet><chatter/></form>
+        </field>
+    </record>
+    <record id="action_dental_patient" model="ir.actions.act_window"><field name="name">Pacientes</field><field name="res_model">dental.patient</field><field name="view_mode">list,form</field></record>
+
+    <record id="view_dental_doctor_list" model="ir.ui.view">
+        <field name="name">dental.doctor.list</field><field name="model">dental.doctor</field>
+        <field name="arch" type="xml"><list><field name="name"/><field name="professional_registration"/><field name="phone"/><field name="email"/><field name="company_id" groups="base.group_multi_company"/></list></field>
+    </record>
+    <record id="view_dental_doctor_form" model="ir.ui.view">
+        <field name="name">dental.doctor.form</field><field name="model">dental.doctor</field>
+        <field name="arch" type="xml"><form><sheet><group><group><field name="name"/><field name="professional_registration"/><field name="user_id"/></group><group><field name="phone"/><field name="email"/><field name="company_id" groups="base.group_multi_company"/></group></group><notebook><page string="Citas"><field name="appointment_ids" readonly="1"><list><field name="appointment_serial"/><field name="patient_id"/><field name="start"/><field name="state"/></list></field></page></notebook></sheet></form></field>
+    </record>
+    <record id="action_dental_doctor" model="ir.actions.act_window"><field name="name">Odontólogos</field><field name="res_model">dental.doctor</field><field name="view_mode">list,form</field></record>
+
+    <record id="view_dental_appointment_list" model="ir.ui.view">
+        <field name="name">dental.appointment.list</field><field name="model">dental.appointment</field>
+        <field name="arch" type="xml"><list decoration-muted="state == 'cancelled'" decoration-success="state == 'done'"><field name="appointment_serial"/><field name="start"/><field name="stop"/><field name="patient_id"/><field name="doctor_id"/><field name="state" widget="badge"/><field name="company_id" groups="base.group_multi_company"/></list></field>
+    </record>
+    <record id="view_dental_appointment_calendar" model="ir.ui.view">
+        <field name="name">dental.appointment.calendar</field><field name="model">dental.appointment</field>
+        <field name="arch" type="xml"><calendar string="Agenda odontológica" date_start="start" date_stop="stop" color="doctor_id" event_open_popup="true"><field name="patient_id"/><field name="doctor_id"/></calendar></field>
+    </record>
+    <record id="view_dental_appointment_form" model="ir.ui.view">
+        <field name="name">dental.appointment.form</field><field name="model">dental.appointment</field>
+        <field name="arch" type="xml">
+            <form><header>
+                <button name="action_confirm" type="object" string="Confirmar" class="btn-primary" invisible="state != 'draft'"/>
+                <button name="action_start_exam" type="object" string="Iniciar atención" class="btn-primary" invisible="state != 'confirmed'"/>
+                <button name="action_done" type="object" string="Finalizar" class="btn-primary" invisible="state != 'in_exam'"/>
+                <button name="action_cancel" type="object" string="Cancelar" invisible="state in ('done', 'cancelled')"/>
+                <button name="action_reset_draft" type="object" string="Volver a borrador" invisible="state != 'cancelled'"/>
+                <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,in_exam,done,cancelled"/>
+            </header><sheet>
+                <div class="oe_title"><h1><field name="appointment_serial" readonly="1"/></h1></div>
+                <group><group><field name="patient_id" readonly="state in ('done', 'cancelled')"/><field name="contact_number"/><field name="doctor_id" readonly="state in ('done', 'cancelled')"/><field name="assistant_id"/><field name="appointment_type"/></group><group><field name="start" readonly="state in ('done', 'cancelled')"/><field name="stop" readonly="state in ('done', 'cancelled')"/><field name="duration" readonly="1"/><field name="company_id" groups="base.group_multi_company"/></group></group>
+                <field name="chief_complaints" placeholder="Motivo de consulta, diagnóstico preliminar u observaciones..." readonly="state in ('done', 'cancelled')"/>
+                <notebook>
+                    <page string="Procedimientos"><field name="procedure_line_ids" readonly="state in ('done', 'cancelled')"><list editable="bottom"><field name="tooth_no"/><field name="service_item_id"/><field name="cost"/></list></field></page>
+                    <page string="Prescripciones"><field name="prescription_ids"><list editable="bottom"><field name="prescription_serial" readonly="1"/><field name="prescription_date"/><field name="patient_id"/><field name="notes"/></list></field></page>
+                    <page string="Adjuntos"><field name="attachment_line_ids" readonly="state in ('done', 'cancelled')"><list editable="bottom"><field name="attachment_date"/><field name="name"/><field name="file" filename="file_name"/><field name="file_name" invisible="1"/></list></field></page>
+                </notebook>
+            </sheet><chatter/></form>
+        </field>
+    </record>
+    <record id="action_dental_appointment" model="ir.actions.act_window"><field name="name">Agenda odontológica</field><field name="res_model">dental.appointment</field><field name="view_mode">calendar,list,form</field></record>
+
+    <record id="view_dental_prescription_list" model="ir.ui.view">
+        <field name="name">dental.prescription.list</field><field name="model">dental.prescription</field>
+        <field name="arch" type="xml"><list><field name="prescription_serial"/><field name="prescription_date"/><field name="patient_id"/><field name="appointment_id"/><field name="company_id" groups="base.group_multi_company"/></list></field>
+    </record>
+    <record id="view_dental_prescription_form" model="ir.ui.view">
+        <field name="name">dental.prescription.form</field><field name="model">dental.prescription</field>
+        <field name="arch" type="xml"><form><sheet><div class="oe_title"><h1><field name="prescription_serial" readonly="1"/></h1></div><group><group><field name="prescription_date"/><field name="patient_id"/></group><group><field name="appointment_id"/><field name="company_id" groups="base.group_multi_company"/></group></group><field name="line_ids"><list editable="bottom"><field name="medicine_trade_name"/><field name="therapeutic_regimen"/></list></field><field name="notes" placeholder="Indicaciones para el paciente..."/></sheet></form></field>
+    </record>
+    <record id="action_dental_prescription" model="ir.actions.act_window"><field name="name">Prescripciones</field><field name="res_model">dental.prescription</field><field name="view_mode">list,form</field></record>
+
+    <menuitem id="menu_dental_clinic_root" name="Clínica Dental" sequence="30" groups="dental_clinic.group_dental_clinic_user"/>
+    <menuitem id="menu_dental_appointment" name="Agenda" parent="menu_dental_clinic_root" action="action_dental_appointment" sequence="10"/>
+    <menuitem id="menu_dental_patient" name="Pacientes" parent="menu_dental_clinic_root" action="action_dental_patient" sequence="20"/>
+    <menuitem id="menu_dental_doctor" name="Odontólogos" parent="menu_dental_clinic_root" action="action_dental_doctor" sequence="30" groups="dental_clinic.group_dental_clinic_manager"/>
+    <menuitem id="menu_dental_prescription" name="Prescripciones" parent="menu_dental_clinic_root" action="action_dental_prescription" sequence="40"/>
+</odoo>
