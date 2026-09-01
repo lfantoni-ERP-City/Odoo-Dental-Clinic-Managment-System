@@ -47,3 +47,7 @@ Ejemplo de creación:
 ```
 
 Las llamadas se ejecutan con los permisos y las reglas multi-compañía del usuario de la clave. Nunca incluyas API keys en el repositorio ni en parámetros de configuración versionados.
+
+## Odontograma
+
+La ficha de cita incluye un odontograma interactivo con nomenclatura FDI. Un diente en color turquesa ya tiene al menos un procedimiento registrado; al hacer clic en cualquier diente editable se añade una línea de procedimiento con ese diente preseleccionado. Completa el procedimiento antes de guardar la cita.

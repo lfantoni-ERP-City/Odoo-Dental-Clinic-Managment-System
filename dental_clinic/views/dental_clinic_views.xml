@@ -55,7 +55,10 @@
                 <group><group><field name="patient_id" readonly="state in ('done', 'cancelled')"/><field name="contact_number"/><field name="doctor_id" readonly="state in ('done', 'cancelled')"/><field name="assistant_id"/><field name="appointment_type"/></group><group><field name="start" readonly="state in ('done', 'cancelled')"/><field name="stop" readonly="state in ('done', 'cancelled')"/><field name="duration" readonly="1"/><field name="company_id" groups="base.group_multi_company"/></group></group>
                 <field name="chief_complaints" placeholder="Motivo de consulta, diagnóstico preliminar u observaciones..." readonly="state in ('done', 'cancelled')"/>
                 <notebook>
-                    <page string="Procedimientos"><field name="procedure_line_ids" readonly="state in ('done', 'cancelled')"><list editable="bottom"><field name="tooth_no"/><field name="service_item_id"/><field name="cost"/></list></field></page>
+                    <page string="Odontograma y procedimientos">
+                        <widget name="dental_tooth_chart" invisible="state == 'cancelled'"/>
+                        <field name="procedure_line_ids" readonly="state in ('done', 'cancelled')"><list editable="bottom"><field name="tooth_no"/><field name="service_item_id"/><field name="cost"/></list></field>
+                    </page>
                     <page string="Prescripciones"><field name="prescription_ids"><list editable="bottom"><field name="prescription_serial" readonly="1"/><field name="prescription_date"/><field name="patient_id"/><field name="notes"/></list></field></page>
                     <page string="Adjuntos"><field name="attachment_line_ids" readonly="state in ('done', 'cancelled')"><list editable="bottom"><field name="attachment_date"/><field name="name"/><field name="file" filename="file_name"/><field name="file_name" invisible="1"/></list></field></page>
                 </notebook>

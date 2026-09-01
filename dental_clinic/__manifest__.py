@@ -2,7 +2,7 @@
 {
     "name": "Clínica Dental Ecuador",
     "summary": "Historia clínica odontológica, citas y prescripciones para Ecuador",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.1.0",
     "category": "Services/Healthcare",
     "author": "ERP City S.A.S.",
     "license": "LGPL-3",
@@ -13,6 +13,13 @@
         "data/dental_clinic_data.xml",
         "views/dental_clinic_views.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "dental_clinic/static/src/components/dental_tooth_chart/dental_tooth_chart.js",
+            "dental_clinic/static/src/components/dental_tooth_chart/dental_tooth_chart.xml",
+            "dental_clinic/static/src/components/dental_tooth_chart/dental_tooth_chart.scss",
+        ],
+    },
     "application": True,
     "installable": True,
 }

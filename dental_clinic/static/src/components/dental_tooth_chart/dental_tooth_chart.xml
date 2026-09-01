@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="dental_clinic.DentalToothChart">
+        <section class="o_dental_tooth_chart" aria-label="Odontograma interactivo">
+            <div class="o_dental_tooth_chart__header">
+                <h3>Odontograma</h3>
+                <span class="o_dental_tooth_chart__legend"><span class="o_dental_tooth_chart__legend-dot"/>Con procedimiento registrado</span>
+            </div>
+            <p class="text-muted mb-3">Haz clic en un diente para añadir un procedimiento. La selección usa nomenclatura FDI.</p>
+            <div class="o_dental_tooth_chart__mouth">
+                <div class="o_dental_tooth_chart__row o_dental_tooth_chart__row--upper">
+                    <div class="o_dental_tooth_chart__quadrant o_dental_tooth_chart__quadrant--right">
+                        <button t-foreach="upperRight" t-as="tooth" t-key="tooth" type="button" t-att-class="toothClass(tooth)" t-att-title="toothTitle(tooth)" t-att-aria-label="toothTitle(tooth)" t-att-disabled="props.readonly" t-on-click="() => this.addProcedure(tooth)"><t t-esc="tooth"/></button>
+                    </div>
+                    <div class="o_dental_tooth_chart__midline"/>
+                    <div class="o_dental_tooth_chart__quadrant">
+                        <button t-foreach="upperLeft" t-as="tooth" t-key="tooth" type="button" t-att-class="toothClass(tooth)" t-att-title="toothTitle(tooth)" t-att-aria-label="toothTitle(tooth)" t-att-disabled="props.readonly" t-on-click="() => this.addProcedure(tooth)"><t t-esc="tooth"/></button>
+                    </div>
+                </div>
+                <div class="o_dental_tooth_chart__row o_dental_tooth_chart__row--lower">
+                    <div class="o_dental_tooth_chart__quadrant o_dental_tooth_chart__quadrant--right">
+                        <button t-foreach="lowerRight" t-as="tooth" t-key="tooth" type="button" t-att-class="toothClass(tooth)" t-att-title="toothTitle(tooth)" t-att-aria-label="toothTitle(tooth)" t-att-disabled="props.readonly" t-on-click="() => this.addProcedure(tooth)"><t t-esc="tooth"/></button>
+                    </div>
+                    <div class="o_dental_tooth_chart__midline"/>
+                    <div class="o_dental_tooth_chart__quadrant">
+                        <button t-foreach="lowerLeft" t-as="tooth" t-key="tooth" type="button" t-att-class="toothClass(tooth)" t-att-title="toothTitle(tooth)" t-att-aria-label="toothTitle(tooth)" t-att-disabled="props.readonly" t-on-click="() => this.addProcedure(tooth)"><t t-esc="tooth"/></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </t>
+</templates>

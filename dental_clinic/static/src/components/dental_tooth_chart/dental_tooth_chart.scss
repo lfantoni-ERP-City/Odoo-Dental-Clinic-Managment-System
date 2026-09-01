@@ -1,0 +1,103 @@
+.o_dental_tooth_chart {
+    --dental-accent: #0f9d9a;
+    --dental-border: #b8c6cb;
+
+    max-width: 740px;
+    margin: 0 auto 1.5rem;
+    border: 1px solid var(--dental-border);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    background: #fff;
+}
+
+.o_dental_tooth_chart__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.o_dental_tooth_chart__header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.o_dental_tooth_chart__legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+}
+
+.o_dental_tooth_chart__legend-dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background: var(--dental-accent);
+}
+
+.o_dental_tooth_chart__mouth {
+    display: grid;
+    gap: 0.6rem;
+}
+
+.o_dental_tooth_chart__row,
+.o_dental_tooth_chart__quadrant {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+}
+
+.o_dental_tooth_chart__row--upper {
+    padding-bottom: 0.6rem;
+    border-bottom: 2px solid #dbe4e7;
+}
+
+.o_dental_tooth_chart__midline {
+    width: 2px;
+    height: 2.8rem;
+    margin: 0 0.35rem;
+    background: #dbe4e7;
+}
+
+.o_dental_tooth {
+    width: 2.55rem;
+    height: 2.8rem;
+    border: 1px solid var(--dental-border);
+    border-radius: 42% 42% 35% 35%;
+    background: #f8fafb;
+    color: #263238;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+
+.o_dental_tooth:hover:not(:disabled),
+.o_dental_tooth:focus-visible:not(:disabled) {
+    border-color: var(--dental-accent);
+    background: #e5f7f6;
+    outline: none;
+    transform: translateY(-2px);
+}
+
+.o_dental_tooth--treated {
+    border-color: var(--dental-accent);
+    background: var(--dental-accent);
+    color: #fff;
+}
+
+.o_dental_tooth:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+@media (max-width: 700px) {
+    .o_dental_tooth_chart {
+        overflow-x: auto;
+    }
+
+    .o_dental_tooth_chart__mouth {
+        min-width: 620px;
+    }
+}
